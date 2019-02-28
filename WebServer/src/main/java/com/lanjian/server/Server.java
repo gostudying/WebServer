@@ -1,17 +1,14 @@
 package com.lanjian.server;
 
-import static com.lanjian.constant.CharConstant.BLANK;
-import static com.lanjian.constant.CharConstant.CRLF;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Date;
 
 import com.lanjian.enums.HttpStatus;
+import com.lanjian.request.Request;
+import com.lanjian.response.Response;
 import com.lanjian.utils.CloseUtil;
 import com.lanjian.utils.LogUtil;
 
@@ -31,6 +28,7 @@ public class Server {
 	public void start(int port) {
 		try {
 			serverSocket = new ServerSocket(port);
+			LogUtil.info("服务器启动成功");
 			receive();
 		} catch (IOException e) {
 			CloseUtil.close(serverSocket);
@@ -45,43 +43,27 @@ public class Server {
 	private void receive() {
 		Socket client = null;
 		try {
+			LogUtil.info("正在等待客户端连接......");
 			client = serverSocket.accept();
-			LogUtil.info("客户端--" + client.getRemoteSocketAddress() + "--连接成功");
-			// 接收客户端请求
-			in = client.getInputStream();
-			byte[] data = new byte[20480];
-			int len = in.read(data);
-			String requestInfo = new String(data, 0, len).trim();
-			System.out.println(requestInfo);
+			Request request = new Request(client);
+			Response response = new Response(client);
+			try {
+				// 响应内容
+				response.print("<html>");
+				response.print("<head>");
+				response.print("<title>");
+				response.print("服务器响应成功");
+				response.print("</title>");
+				response.print("</head>");
+				response.print("<body>");
+				response.print("hello");
+				response.print("</body>");
+				response.print("</html>");
+				response.pushToClient(HttpStatus.OK);
+			} catch (Exception e) {
+				response.pushToClient(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
 
-			// 响应内容
-			StringBuilder content = new StringBuilder();
-			content.append("<html>");
-			content.append("<head>");
-			content.append("<title>");
-			content.append("服务器响应成功");
-			content.append("</title>");
-			content.append("</head>");
-			content.append("<body>");
-			content.append("hello");
-			content.append("</body>");
-			content.append("</html>");
-
-			// 响应：响应头+响应内容
-			StringBuilder responseInfo = new StringBuilder();
-			responseInfo.append("HTTP/1.1").append(BLANK).append(HttpStatus.OK).append(BLANK).append("OK").append(CRLF);
-			responseInfo.append("Date:").append(new Date()).append(CRLF);
-			responseInfo.append("Server:WebServer/1.0;charset=GBK").append(CRLF);
-			responseInfo.append("Content-type:text/html").append(CRLF);
-			// 字节长度，不是字符长度
-			responseInfo.append("Content-length:").append(content.toString().getBytes().length).append(CRLF);
-			responseInfo.append(CRLF);
-			responseInfo.append(content);
-
-			// 写出响应
-			out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
-			out.write(responseInfo.toString());
-			out.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 			LogUtil.error("客户端--" + client.getRemoteSocketAddress() + "--连接失败");
