@@ -10,7 +10,7 @@ import java.util.Properties;
  * @author lanjian
  * @date 2019年2月27日
  */
-public class PropertyUtil {
+public class PropertiesUtil {
 
 	private static Properties props;
 
@@ -20,11 +20,11 @@ public class PropertyUtil {
 	}
 
 	private static void loadProps() {
-		LogUtil.info("开始加载properties文件内容.......");
+		LogUtil.info("正在加载properties文件内容......");
 		InputStream in = null;
 		try {
 			// resource目录下直接写文件名
-			in = PropertyUtil.class.getClassLoader().getResourceAsStream("server.properties");
+			in = PropertiesUtil.class.getClassLoader().getResourceAsStream("server.properties");
 			props.load(in);
 		} catch (FileNotFoundException e) {
 			LogUtil.error("server.properties文件未找到");
@@ -33,8 +33,7 @@ public class PropertyUtil {
 		} finally {
 			CloseUtil.close(in);
 		}
-		LogUtil.info("加载properties文件内容完成...........");
-		LogUtil.info("properties文件内容：" + props);
+		LogUtil.info("加载properties文件内容完成");
 	}
 
 	public static String getProperty(String key) {

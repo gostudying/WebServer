@@ -8,11 +8,12 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 
 import com.lanjian.context.holder.ServletHolder;
+import com.lanjian.servlet.Servlet;
 import com.lanjian.utils.LogUtil;
 import com.lanjian.utils.XMLUtil;
 
 /**
- * @explain ServletContext，在应用启动时被初始化
+ * @explain ServletContext是一个上下文对象，用于保存各种和servlet有关的配置信息
  * @author lanjian
  * @date 2019年3月1日
  */
@@ -35,6 +36,7 @@ public class ServletContext {
 	 */
 	private void parseConfig() {
 		try {
+			LogUtil.info("正在解析web.xml配置文件......");
 			Document document = XMLUtil.getDocument("web.xml");
 			// 获取根节点
 			Element root = document.getRootElement();
@@ -54,10 +56,39 @@ public class ServletContext {
 					this.servletMapping.put(url, servletName);
 				}
 			}
+			LogUtil.info("web.xml配置解析成功");
 		} catch (Exception e) {
 			e.printStackTrace();
 			LogUtil.error("web.xml配置解析失败");
 		}
+	}
 
+	/**
+	 * @throws ClassNotFoundException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
+	 * @explain 根据不同的url，返回对应的servlet
+	 */
+	public Servlet getServlet(String url) {
+		if (servletMapping.containsKey(url)) {
+			// 根据url找到servletName
+			String servletName = servletMapping.get(url);
+			// 根据servletName找到对应servlet
+			ServletHolder holder = servlet.get(servletName);
+			if (holder.getServlet() == null) {
+				try {
+					Servlet servlet = (Servlet) Class.forName(holder.getServletClass()).newInstance();
+					// 得到servlet之后设置进去，不用每次都反射得到
+					holder.setServlet(servlet);
+				} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+					e.printStackTrace();
+					LogUtil.error("servlet反射实例化失败");
+				}
+			}
+			return holder.getServlet();
+		} else {
+			LogUtil.info("找不到对应页面");
+			return null;
+		}
 	}
 }

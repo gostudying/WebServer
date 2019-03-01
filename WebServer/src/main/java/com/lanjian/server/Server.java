@@ -5,10 +5,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
 
+import com.lanjian.context.ServletContext;
+import com.lanjian.context.WebApplication;
 import com.lanjian.request.Request;
 import com.lanjian.response.Response;
 import com.lanjian.servlet.Servlet;
-import com.lanjian.servlet.impl.IndexServlet;
 import com.lanjian.utils.CloseUtil;
 import com.lanjian.utils.LogUtil;
 
@@ -48,8 +49,9 @@ public class Server {
 			System.out.println(request.getMethod());
 			System.out.println(request.getUrl());
 			System.out.println(Arrays.toString(request.getParameterValues("name")));
-
-			Servlet servlet = new IndexServlet();
+			// 得到上下文对象
+			ServletContext context = WebApplication.getServletContext();
+			Servlet servlet = context.getServlet(request.getUrl());
 			servlet.service(request, response);
 
 		} catch (IOException e) {
@@ -64,12 +66,7 @@ public class Server {
 	 * @explain 关闭服务器
 	 */
 	public void close() {
-
-	}
-
-	public static void main(String[] args) {
-		Server server = new Server();
-		server.start(8080);
+		CloseUtil.close(serverSocket);
 	}
 
 }

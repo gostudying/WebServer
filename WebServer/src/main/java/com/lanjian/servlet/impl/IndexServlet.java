@@ -30,7 +30,7 @@ public class IndexServlet implements Servlet {
 			response.print("</title>");
 			response.print("</head>");
 			response.print("<body>");
-			response.print("你好");
+			response.print("你好index");
 			response.print("</body>");
 			response.print("</html>");
 			response.pushToClient(HttpStatus.OK);

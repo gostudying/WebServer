@@ -3,7 +3,7 @@ package com.lanjian;
 import java.util.Scanner;
 
 import com.lanjian.server.Server;
-import com.lanjian.utils.PropertyUtil;
+import com.lanjian.utils.PropertiesUtil;
 
 /**
  * @explain 服务器入口
@@ -12,9 +12,9 @@ import com.lanjian.utils.PropertyUtil;
  */
 public class BootStrap {
 
-	public static void run() {
+	public static void main(String[] args) {
 		// 获取端口号
-		String port = PropertyUtil.getProperty("server.port");
+		String port = PropertiesUtil.getProperty("server.port");
 		if (port == null) {
 			throw new IllegalArgumentException("server.port 不存在");
 		}
