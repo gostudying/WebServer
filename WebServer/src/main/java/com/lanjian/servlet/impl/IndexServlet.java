@@ -2,12 +2,15 @@ package com.lanjian.servlet.impl;
 
 import java.io.IOException;
 
-import com.lanjian.enums.HttpStatus;
+import com.lanjian.constant.HttpStatus;
+import com.lanjian.exception.InternalServerErrorException;
+import com.lanjian.exception.base.ServletException;
 import com.lanjian.request.Request;
 import com.lanjian.response.Response;
-import com.lanjian.servlet.Servlet;
+import com.lanjian.servlet.HttpServlet;
+import com.lanjian.utils.LogUtil;
 
-public class IndexServlet implements Servlet {
+public class IndexServlet extends HttpServlet {
 
 	@Override
 	public void init() {
@@ -20,8 +23,9 @@ public class IndexServlet implements Servlet {
 	}
 
 	@Override
-	public void service(Request request, Response response) throws IOException {
+	public void doGet(Request request, Response response) throws IOException, ServletException {
 		try {
+			LogUtil.info("正在向浏览器返回数据......");
 			// 响应内容
 			response.print("<html>");
 			response.print("<head>");
@@ -33,10 +37,16 @@ public class IndexServlet implements Servlet {
 			response.print("你好index");
 			response.print("</body>");
 			response.print("</html>");
-			response.pushToClient(HttpStatus.OK);
+			response.addCookie("name", "lanjian");
+			response.flush(HttpStatus.OK);
 		} catch (Exception e) {
-			response.pushToClient(HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new InternalServerErrorException();
 		}
+	}
+
+	@Override
+	public void doPost(Request request, Response response) throws IOException, ServletException {
+		
 	}
 
 }

@@ -1,6 +1,6 @@
 package com.lanjian.exception;
 
-import com.lanjian.enums.HttpStatus;
+import com.lanjian.constant.HttpStatus;
 import com.lanjian.exception.base.ServletException;
 
 public class InternalServerErrorException extends ServletException {

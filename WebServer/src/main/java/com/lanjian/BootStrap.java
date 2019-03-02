@@ -2,6 +2,8 @@ package com.lanjian;
 
 import java.util.Scanner;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.lanjian.server.Server;
 import com.lanjian.utils.PropertiesUtil;
 
@@ -15,8 +17,8 @@ public class BootStrap {
 	public static void main(String[] args) {
 		// 获取端口号
 		String port = PropertiesUtil.getProperty("server.port");
-		if (port == null) {
-			throw new IllegalArgumentException("server.port 不存在");
+		if (StringUtils.isBlank(port)) {
+			port = "8080";// 默认端口
 		}
 		Server server = new Server();
 		// 服务器启动

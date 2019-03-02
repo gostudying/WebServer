@@ -1,6 +1,6 @@
 package com.lanjian.exception.base;
 
-import com.lanjian.enums.HttpStatus;
+import com.lanjian.constant.HttpStatus;
 
 /**
  * @explain 根异常，异常和状态码一对一关系

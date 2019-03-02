@@ -1,4 +1,4 @@
-package com.lanjian.enums;
+package com.lanjian.constant;
 
 /**
  * @author lanjian

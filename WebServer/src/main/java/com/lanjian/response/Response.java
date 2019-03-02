@@ -8,11 +8,16 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.lanjian.enums.HttpStatus;
+import com.lanjian.constant.HttpStatus;
 import com.lanjian.utils.CloseUtil;
+import com.lanjian.utils.LogUtil;
 
 /**
  * @explain 封装响应信息
@@ -28,11 +33,15 @@ public class Response {
 	private int len;
 	// 响应头
 	private StringBuilder headInfo;
+	private Map<String, String> cookies;
+	private StringBuilder cookieStr;
 
 	private Response() {
 		content = new StringBuilder();
 		len = 0;
 		headInfo = new StringBuilder();
+		cookies = new HashMap<>();
+		cookieStr = new StringBuilder();
 	}
 
 	public Response(Socket client) throws IOException {
@@ -67,6 +76,10 @@ public class Response {
 		headInfo.append("Content-type:text/html").append(CRLF);
 		// 字节长度，不是字符长度
 		headInfo.append("Content-length:").append(len).append(CRLF);
+		convertCookie();
+		if (!StringUtils.isBlank(cookieStr)) {
+			headInfo.append("Set-Cookie:" + cookieStr.toString()).append(CRLF);
+		}
 		headInfo.append(CRLF);
 	}
 
@@ -84,9 +97,9 @@ public class Response {
 
 	/**
 	 * @throws IOException
-	 * @explain 推送响应到客户端
+	 * @explain 将响应刷回浏览器
 	 */
-	public void pushToClient(HttpStatus code) throws IOException {
+	public void flush(HttpStatus code) throws IOException {
 		try {
 			// 创建头信息
 			createHeadInfo(code);
@@ -97,8 +110,26 @@ public class Response {
 				out.append(content.toString());
 			}
 			out.flush();
+			LogUtil.info("向浏览器返回数据成功");
 		} finally {
 			CloseUtil.close(out);
+		}
+	}
+
+	public void addCookie(String key, String value) {
+		cookies.put(key, value);
+	}
+
+	/**
+	 * @explain 将map形式的cookie转化为字符串形式
+	 */
+	private void convertCookie() {
+		Iterator<Entry<String, String>> it = cookies.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry<String, String> entry = it.next();
+			String key = entry.getKey();
+			String value = entry.getValue();
+			cookieStr.append(key).append("=").append(value).append(";");
 		}
 	}
 

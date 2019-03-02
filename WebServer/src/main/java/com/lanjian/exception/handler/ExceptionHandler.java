@@ -14,7 +14,7 @@ public class ExceptionHandler {
 	public void handle(ServletException e, Response response) {
 		e.printStackTrace();
 		try {
-			response.pushToClient(e.getStatus());
+			response.flush(e.getStatus());
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
