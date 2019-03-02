@@ -2,6 +2,7 @@ package com.lanjian.servlet;
 
 import java.io.IOException;
 
+import com.lanjian.exception.base.ServletException;
 import com.lanjian.request.Request;
 import com.lanjian.response.Response;
 
@@ -15,5 +16,5 @@ public interface Servlet {
 
 	void destroy();
 
-	void service(Request request, Response response) throws IOException;
+	void service(Request request, Response response) throws IOException, ServletException;
 }

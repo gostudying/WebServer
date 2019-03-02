@@ -9,6 +9,8 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.lanjian.enums.HttpStatus;
 import com.lanjian.utils.CloseUtil;
 
@@ -42,7 +44,7 @@ public class Response {
 	 * @explain 根据状态码构建响应头信息
 	 */
 	private void createHeadInfo(HttpStatus code) {
-		headInfo.append("HTTP/1.1").append(BLANK).append(code).append(BLANK);
+		headInfo.append("HTTP/1.1").append(BLANK).append(code.getCode()).append(BLANK);
 		switch (code) {
 		case OK:
 			headInfo.append(HttpStatus.OK.getMsg());
@@ -91,7 +93,9 @@ public class Response {
 			// 添加响应头
 			out.append(headInfo.toString());
 			// 添加响应内容
-			out.append(content.toString());
+			if (!StringUtils.isBlank(content)) {
+				out.append(content.toString());
+			}
 			out.flush();
 		} finally {
 			CloseUtil.close(out);

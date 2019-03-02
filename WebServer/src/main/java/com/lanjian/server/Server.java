@@ -15,6 +15,7 @@ import com.lanjian.utils.LogUtil;
  */
 public class Server {
 	private ServerSocket serverSocket;
+	private Dispatcher dispatcher;
 	private boolean isStop = false;
 
 	/**
@@ -37,12 +38,12 @@ public class Server {
 	 */
 	private void receive() {
 		Socket client = null;
-		LogUtil.info("正在等待客户端连接......");
+		dispatcher = new Dispatcher();
 		while (!isStop) {
 			try {
+				LogUtil.info("正在等待客户端连接......");
 				client = serverSocket.accept();
 				// 客户端连接后，创建新线程去处理
-				Dispatcher dispatcher = new Dispatcher();
 				dispatcher.doDispatch(client);
 			} catch (IOException e) {
 				e.printStackTrace();

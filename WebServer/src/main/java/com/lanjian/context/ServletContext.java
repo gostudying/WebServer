@@ -8,6 +8,8 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 
 import com.lanjian.context.holder.ServletHolder;
+import com.lanjian.exception.ServletNotFoundException;
+import com.lanjian.exception.base.ServletException;
 import com.lanjian.servlet.Servlet;
 import com.lanjian.utils.LogUtil;
 import com.lanjian.utils.XMLUtil;
@@ -64,12 +66,13 @@ public class ServletContext {
 	}
 
 	/**
+	 * @throws ServletException
 	 * @throws ClassNotFoundException
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
 	 * @explain 根据不同的url，返回对应的servlet
 	 */
-	public Servlet getServlet(String url) {
+	public Servlet getServlet(String url) throws ServletNotFoundException {
 		if (servletMapping.containsKey(url)) {
 			// 根据url找到servletName
 			String servletName = servletMapping.get(url);
@@ -83,12 +86,16 @@ public class ServletContext {
 				} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 					e.printStackTrace();
 					LogUtil.error("servlet反射实例化失败");
+					throw new ServletNotFoundException();
 				}
+			}
+			if (holder.getServlet() == null) {
+				throw new ServletNotFoundException();
 			}
 			return holder.getServlet();
 		} else {
 			LogUtil.info("找不到对应页面");
-			return null;
+			throw new ServletNotFoundException();
 		}
 	}
 }
