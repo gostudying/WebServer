@@ -3,13 +3,8 @@ package com.lanjian.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
 
-import com.lanjian.context.ServletContext;
-import com.lanjian.context.WebApplication;
-import com.lanjian.request.Request;
-import com.lanjian.response.Response;
-import com.lanjian.servlet.Servlet;
+import com.lanjian.dispatcher.Dispatcher;
 import com.lanjian.utils.CloseUtil;
 import com.lanjian.utils.LogUtil;
 
@@ -20,6 +15,7 @@ import com.lanjian.utils.LogUtil;
  */
 public class Server {
 	private ServerSocket serverSocket;
+	private boolean isStop = false;
 
 	/**
 	 * @explain 开启服务器
@@ -42,23 +38,16 @@ public class Server {
 	private void receive() {
 		Socket client = null;
 		LogUtil.info("正在等待客户端连接......");
-		try {
-			client = serverSocket.accept();
-			Request request = new Request(client);
-			Response response = new Response(client);
-			System.out.println(request.getMethod());
-			System.out.println(request.getUrl());
-			System.out.println(Arrays.toString(request.getParameterValues("name")));
-			// 得到上下文对象
-			ServletContext context = WebApplication.getServletContext();
-			Servlet servlet = context.getServlet(request.getUrl());
-			servlet.service(request, response);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-			LogUtil.error("客户端--" + client.getRemoteSocketAddress() + "--连接失败");
-		} finally {
-			CloseUtil.close(client);
+		while (!isStop) {
+			try {
+				client = serverSocket.accept();
+				// 客户端连接后，创建新线程去处理
+				Dispatcher dispatcher = new Dispatcher();
+				dispatcher.doDispatch(client);
+			} catch (IOException e) {
+				e.printStackTrace();
+				LogUtil.error("客户端--" + client.getRemoteSocketAddress() + "--连接失败");
+			}
 		}
 	}
 
@@ -66,6 +55,9 @@ public class Server {
 	 * @explain 关闭服务器
 	 */
 	public void close() {
+		// 关闭主循环
+		this.isStop = true;
+		// 关闭服务器
 		CloseUtil.close(serverSocket);
 	}
 
