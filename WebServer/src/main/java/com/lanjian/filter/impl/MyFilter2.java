@@ -5,12 +5,11 @@ import com.lanjian.filter.FilterChain;
 import com.lanjian.request.ServletRequest;
 import com.lanjian.response.ServletResponse;
 
-public class MyFilter2 implements Filter{
+public class MyFilter2 implements Filter {
 
 	@Override
 	public void init() {
-		// TODO Auto-generated method stub
-		
+		System.out.println("过滤器2初始化");
 	}
 
 	@Override
@@ -22,7 +21,7 @@ public class MyFilter2 implements Filter{
 	@Override
 	public void destroy() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

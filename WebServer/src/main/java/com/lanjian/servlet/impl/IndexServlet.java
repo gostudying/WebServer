@@ -14,7 +14,7 @@ public class IndexServlet extends HttpServlet {
 
 	@Override
 	public void init() {
-
+		System.out.println("===init===");
 	}
 
 	@Override
@@ -46,7 +46,7 @@ public class IndexServlet extends HttpServlet {
 
 	@Override
 	public void doPost(ServletRequest request, ServletResponse response) throws IOException, ServletException {
-		
+
 	}
 
 }

@@ -12,7 +12,6 @@ import org.dom4j.Element;
 import com.lanjian.context.holder.FilterHolder;
 import com.lanjian.context.holder.ServletHolder;
 import com.lanjian.cookie.Cookie;
-import com.lanjian.exception.FilterNotFoundException;
 import com.lanjian.exception.ServletNotFoundException;
 import com.lanjian.exception.base.ServletException;
 import com.lanjian.filter.Filter;
@@ -164,7 +163,7 @@ public class ServletContext {
 	/**
 	 * @explain 根据url找到对应的filters
 	 */
-	public List<Filter> getFilters(String url) throws FilterNotFoundException {
+	public List<Filter> getFilters(String url) {
 		List<Filter> filterlist = new ArrayList<>();
 		if (filterMapping.containsKey(url)) {
 			List<String> filterNames = filterMapping.get(url);
@@ -181,14 +180,12 @@ public class ServletContext {
 					} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 						e.printStackTrace();
 						LogUtil.error("filter反射实例化失败");
-						throw new FilterNotFoundException();
 					}
 				}
 				filterlist.add(filter);
 			}
 		} else {
 			LogUtil.info("该路径没有对应的过滤器");
-			throw new FilterNotFoundException();
 		}
 		return filterlist;
 	}

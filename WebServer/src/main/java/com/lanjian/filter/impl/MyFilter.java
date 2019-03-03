@@ -9,8 +9,7 @@ public class MyFilter implements Filter {
 
 	@Override
 	public void init() {
-		// TODO Auto-generated method stub
-
+		System.out.println("过滤器1初始化");
 	}
 
 	@Override
