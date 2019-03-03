@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.lanjian.exception.FilterNotFoundException;
 import com.lanjian.exception.ServletNotFoundException;
 import com.lanjian.exception.handler.ExceptionHandler;
 import com.lanjian.request.ServletRequest;
@@ -32,6 +33,8 @@ public class RequestDispatcher {
 			RequestHandler requestHandler = new RequestHandler(request, response);
 			pool.execute(requestHandler);
 		} catch (ServletNotFoundException e) {
+			exceptionHandler.handle(e, response);
+		} catch (FilterNotFoundException e) {
 			exceptionHandler.handle(e, response);
 		}
 	}

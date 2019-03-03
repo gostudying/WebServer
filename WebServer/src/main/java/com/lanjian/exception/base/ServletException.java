@@ -6,6 +6,7 @@ package com.lanjian.exception.base;
  * @date 2019年3月2日
  */
 public class ServletException extends Exception {
+	private static final long serialVersionUID = 1L;
 	private int status;
 
 	public ServletException(int status) {

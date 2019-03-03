@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import com.lanjian.context.WebApplication;
+import com.lanjian.exception.FilterNotFoundException;
 import com.lanjian.exception.ServerErrorException;
 import com.lanjian.exception.ServletNotFoundException;
 import com.lanjian.exception.base.ServletException;
@@ -27,7 +28,8 @@ public class RequestHandler implements Runnable, FilterChain {
 	private List<Filter> filters;
 	private int filterIndex = 0;
 
-	public RequestHandler(ServletRequest request, ServletResponse response) throws ServletNotFoundException {
+	public RequestHandler(ServletRequest request, ServletResponse response)
+			throws ServletNotFoundException, FilterNotFoundException {
 		this.request = request;
 		this.response = response;
 		this.servlet = WebApplication.getServletContext().getServlet(request.getRequestURI());
@@ -51,7 +53,7 @@ public class RequestHandler implements Runnable, FilterChain {
 	}
 
 	/**
-	 * @explain 递归执行
+	 * @explain 循环执行filters列表中的filter
 	 */
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response) {

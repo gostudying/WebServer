@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.lanjian.context.ServletContext;
 import com.lanjian.context.WebApplication;
 import com.lanjian.cookie.Cookie;
+import com.lanjian.exception.RequestParseException;
 import com.lanjian.request.dispatcher.RequestDispatcher;
 import com.lanjian.request.handler.RequestHandler;
 import com.lanjian.session.HttpSession;
@@ -100,6 +101,7 @@ public class ServletRequest {
 	}
 
 	/**
+	 * @throws RequestParseException
 	 * @explain 解析请求
 	 */
 	private void parseRequestInfo() {

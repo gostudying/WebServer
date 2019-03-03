@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import com.lanjian.request.dispatcher.RequestDispatcher;
 import com.lanjian.utils.CloseUtil;
 import com.lanjian.utils.LogUtil;
 
@@ -15,8 +14,8 @@ import com.lanjian.utils.LogUtil;
  */
 public class Server {
 	private ServerSocket serverSocket;
-	private RequestDispatcher dispatcher;
-	private boolean isStop = false;
+	private Acceptor acceptor;
+	private volatile boolean isRunning = true;
 
 	/**
 	 * @explain 开启服务器
@@ -25,7 +24,7 @@ public class Server {
 		try {
 			serverSocket = new ServerSocket(port);
 			LogUtil.info("服务器启动成功");
-			receive();
+			initAcceptor();
 		} catch (IOException e) {
 			CloseUtil.close(serverSocket);
 			e.printStackTrace();
@@ -34,22 +33,22 @@ public class Server {
 	}
 
 	/**
-	 * @explain 处理连接请求
+	 * @explain 新建一个线程去处理连接请求
 	 */
-	private void receive() {
-		Socket client = null;
-		dispatcher = new RequestDispatcher();
-		LogUtil.info("正在等待客户端连接......");
-		while (!isStop) {
-			try {
-				client = serverSocket.accept();
-				// 客户端连接后，将客户端交给分发器处理
-				dispatcher.doDispatch(client);
-			} catch (IOException e) {
-				e.printStackTrace();
-				LogUtil.error("客户端--" + client.getRemoteSocketAddress() + "--连接失败");
-			}
-		}
+	private void initAcceptor() {
+		acceptor = new Acceptor(this);
+		Thread t = new Thread(acceptor, "thread-accept");
+		// 设置为后台线程
+		t.setDaemon(true);
+		t.start();
+	}
+
+	public Socket accept() throws IOException {
+		return serverSocket.accept();
+	}
+
+	public boolean isRunning() {
+		return this.isRunning;
 	}
 
 	/**
@@ -57,9 +56,11 @@ public class Server {
 	 */
 	public void close() {
 		// 关闭主循环
-		this.isStop = true;
+		this.isRunning = false;
 		// 关闭服务器
 		CloseUtil.close(serverSocket);
+		// 关闭接收器
+		acceptor.close();
 	}
 
 }

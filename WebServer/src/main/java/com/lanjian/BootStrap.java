@@ -13,12 +13,13 @@ import com.lanjian.utils.PropertiesUtil;
  * @date 2019年2月27日
  */
 public class BootStrap {
+	private static final String DEFAULT_PORT = "8080";
 
 	public static void main(String[] args) {
 		// 获取端口号
 		String port = PropertiesUtil.getProperty("server.port");
 		if (StringUtils.isBlank(port)) {
-			port = "8080";// 默认端口
+			port = DEFAULT_PORT;
 		}
 		Server server = new Server();
 		// 服务器启动

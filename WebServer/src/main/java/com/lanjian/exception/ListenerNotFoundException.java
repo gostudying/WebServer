@@ -10,6 +10,7 @@ import com.lanjian.exception.base.ServletException;
  * @date 2019年3月3日
  */
 public class ListenerNotFoundException extends ServletException {
+	private static final long serialVersionUID = 1L;
 	private static final int status = HttpStatus.NotFound;
 
 	public ListenerNotFoundException() {
