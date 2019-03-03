@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import com.lanjian.dispatcher.RequestDispatcher;
+import com.lanjian.request.dispatcher.RequestDispatcher;
 import com.lanjian.utils.CloseUtil;
 import com.lanjian.utils.LogUtil;
 
@@ -39,9 +39,9 @@ public class Server {
 	private void receive() {
 		Socket client = null;
 		dispatcher = new RequestDispatcher();
+		LogUtil.info("正在等待客户端连接......");
 		while (!isStop) {
 			try {
-				LogUtil.info("正在等待客户端连接......");
 				client = serverSocket.accept();
 				// 客户端连接后，将客户端交给分发器处理
 				dispatcher.doDispatch(client);

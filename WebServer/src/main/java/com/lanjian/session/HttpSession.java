@@ -11,14 +11,14 @@ import com.lanjian.context.WebApplication;
  * @author lanjian
  * @date 2019年3月2日
  */
-public class Session {
+public class HttpSession {
 	private String id;
 	private Map<String, Object> attributes;
 	private boolean isValid;
 	// 用于判断sessiion是否过期，标准为当前时间-上次访问时间 >= 阈值
 	private Instant lastAccessed;
 
-	public Session(String id) {
+	public HttpSession(String id) {
 		this.id = id;
 		this.attributes = new ConcurrentHashMap<>();
 		this.isValid = true;

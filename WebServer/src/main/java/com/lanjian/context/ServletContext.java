@@ -1,24 +1,28 @@
 package com.lanjian.context;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
 
+import com.lanjian.context.holder.FilterHolder;
 import com.lanjian.context.holder.ServletHolder;
 import com.lanjian.exception.ServletNotFoundException;
 import com.lanjian.exception.base.ServletException;
+import com.lanjian.filter.Filter;
 import com.lanjian.response.ServletResponse;
 import com.lanjian.servlet.http.HttpServlet;
-import com.lanjian.session.Session;
+import com.lanjian.session.HttpSession;
 import com.lanjian.utils.LogUtil;
 import com.lanjian.utils.UUIDUtil;
 import com.lanjian.utils.XMLUtil;
 
 /**
- * @explain ServletContext是一个上下文对象，用于保存各种和servlet有关的配置信息
+ * @explain 一个web项目，就存在一个ServletContext实例，每个Servlet读可以访问到它
  * @author lanjian
  * @date 2019年3月1日
  */
@@ -26,21 +30,48 @@ import com.lanjian.utils.XMLUtil;
 public class ServletContext {
 
 	// index --> IndexServlet 一对一
-	private Map<String, ServletHolder> servlet;
+	private Map<String, ServletHolder> servlets;
 	// /index --> index 多对一
 	private Map<String, String> servletMapping;
-	// 所有的session
-	private Map<String, Session> sessions;
+
+	// 过滤器
+	private Map<String, FilterHolder> filters;
+	// 一个url可以对应多个过滤器，但只能对应一个servlet
+	private Map<String, List<String>> filterMapping;
+
+	// web项目中所有的session
+	private Map<String, HttpSession> sessions;
+
+	// ServletContext域
+	private Map<String, Object> attribute;
 
 	public ServletContext() {
-		servlet = new HashMap<String, ServletHolder>();
+		servlets = new HashMap<String, ServletHolder>();
 		servletMapping = new HashMap<String, String>();
+		filters = new HashMap<String, FilterHolder>();
+		filterMapping = new HashMap<String, List<String>>();
+		sessions = new HashMap<String, HttpSession>();
+		attribute = new ConcurrentHashMap<String, Object>();
 		// 用dom4j解析web.xml配置
 		parseConfig();
 	}
 
+	public Object getAttribute(String name) {
+		return attribute.get(name);
+	}
+
+	public void setAttribute(String name, Object obj) {
+		attribute.put(name, obj);
+	}
+
+	public void removeAttribute(String name) {
+		if (attribute.containsKey(name)) {
+			attribute.remove(name);
+		}
+	}
+
 	/**
-	 * @explain 用dom4j解析web.xml配置
+	 * @explain 用dom4j解析web.xml配置文件
 	 */
 	private void parseConfig() {
 		try {
@@ -53,7 +84,7 @@ public class ServletContext {
 			for (Element servletElement : servlets) {
 				String servletName = servletElement.element("servlet-name").getTextTrim();
 				String servletClass = servletElement.element("servlet-class").getTextTrim();
-				this.servlet.put(servletName, new ServletHolder(servletClass));
+				this.servlets.put(servletName, new ServletHolder(servletClass));
 			}
 			List<Element> servletMapping = root.elements("servlet-mapping");
 			for (Element mapping : servletMapping) {
@@ -62,6 +93,27 @@ public class ServletContext {
 				for (Element urlPattern : urlPatterns) {
 					String url = urlPattern.getTextTrim();
 					this.servletMapping.put(url, servletName);
+				}
+			}
+			// 解析 filter
+			List<Element> filters = root.elements("filter");
+			for (Element filterEle : filters) {
+				String filterName = filterEle.element("filter-name").getTextTrim();
+				String filterClass = filterEle.element("filter-class").getTextTrim();
+				this.filters.put(filterName, new FilterHolder(filterClass));
+			}
+
+			List<Element> filterMapping = root.elements("filter-mapping");
+			for (Element mapping : filterMapping) {
+				List<Element> urlPatterns = mapping.elements("url-pattern");
+				String value = mapping.element("filter-name").getTextTrim();
+				for (Element urlPattern : urlPatterns) {
+					List<String> values = this.filterMapping.get(urlPattern.getTextTrim());
+					if (values == null) {
+						values = new ArrayList<>();
+						this.filterMapping.put(urlPattern.getText(), values);
+					}
+					values.add(value);
 				}
 			}
 			LogUtil.info("web.xml配置解析成功");
@@ -83,7 +135,7 @@ public class ServletContext {
 			// 根据url找到servletName
 			String servletName = servletMapping.get(url);
 			// 根据servletName找到对应servlet
-			ServletHolder holder = servlet.get(servletName);
+			ServletHolder holder = servlets.get(servletName);
 			if (holder.getServlet() == null) {
 				try {
 					HttpServlet servlet = (HttpServlet) Class.forName(holder.getServletClass()).newInstance();
@@ -100,16 +152,44 @@ public class ServletContext {
 			}
 			return holder.getServlet();
 		} else {
-			LogUtil.info("找不到对应页面");
+			LogUtil.info("该路径没有对应的Servlet");
 			throw new ServletNotFoundException();
 		}
 	}
 
 	/**
+	 * @explain 根据url找到对应的filters
+	 */
+	public List<Filter> getFilters(String url) {
+		List<Filter> filterlist = new ArrayList<>();
+		if (filterMapping.containsKey(url)) {
+			List<String> filterNames = filterMapping.get(url);
+			for (String filterName : filterNames) {
+				FilterHolder holder = filters.get(filterName);
+				Filter filter = holder.getFilter();
+				if (filter == null) {
+					try {
+						filter = (Filter) Class.forName(holder.getFilterClass()).newInstance();
+						// 得到filter之后设置进去，不用每次都反射得到
+						holder.setFilter(filter);
+					} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+						e.printStackTrace();
+						LogUtil.error("filter反射实例化失败");
+					}
+				}
+				filterlist.add(filter);
+			}
+		} else {
+			LogUtil.info("该路径没有对应的过滤器");
+		}
+		return filterlist;
+	}
+
+	/**
 	 * @explain 创建session
 	 */
-	public Session createSession(ServletResponse response) {
-		Session session = new Session(UUIDUtil.uuid());
+	public HttpSession createSession(ServletResponse response) {
+		HttpSession session = new HttpSession(UUIDUtil.uuid());
 		sessions.put(session.getId(), session);
 		response.addCookie("JSESSIONID", session.getId());
 		return session;
@@ -118,14 +198,30 @@ public class ServletContext {
 	/**
 	 * @explain 获取session
 	 */
-	public Session getSession(String JSESSIONID) {
+	public HttpSession getSession(String JSESSIONID) {
 		return sessions.get(JSESSIONID);
 	}
 
 	/**
 	 * @explain 使session无效
 	 */
-	public void invalidateSession(Session session) {
+	public void invalidateSession(HttpSession session) {
 		sessions.remove(session.getId());
+	}
+
+	/**
+	 * @explain web关闭前被调用
+	 */
+	public void destroy() {
+		servlets.values().forEach(servletHolder -> {
+			if (servletHolder.getServlet() != null) {
+				servletHolder.getServlet().destroy();
+			}
+		});
+		filters.values().forEach(filterHolder -> {
+			if (filterHolder.getFilter() != null) {
+				filterHolder.getFilter().destroy();
+			}
+		});
 	}
 }

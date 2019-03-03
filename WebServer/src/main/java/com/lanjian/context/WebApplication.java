@@ -1,7 +1,7 @@
 package com.lanjian.context;
 
 /**
- * @explain 让servletContext在项目启动时就被初始化
+ * @explain static变量让servletContext在项目启动时就被初始化
  * @author lanjian
  * @date 2019年3月1日
  */

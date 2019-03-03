@@ -36,6 +36,20 @@ public class ServletResponse {
 	private Map<String, String> cookies;
 	private StringBuilder cookieStr;
 
+//	public String getCharacterEncoding();
+//
+//	public void setCharacterEncoding(String charset);
+//
+//	public String getContentType();
+//
+//	public void setContentType(String type);
+//
+//	public void setContentLength(int len);
+//
+//	public PrintWriter getWriter() throws IOException;
+//
+//	public void flushBuffer() throws IOException;
+	
 	private ServletResponse() {
 		content = new StringBuilder();
 		len = 0;

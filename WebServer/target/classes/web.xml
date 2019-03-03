@@ -3,6 +3,24 @@
 	xmlns="http://java.sun.com/xml/ns/javaee"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	id="WebApp_ID" version="2.5">
+	<filter>
+		<filter-name>MyFilter2</filter-name>
+		<filter-class>com.lanjian.filter.impl.MyFilter2</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>MyFilter2</filter-name>
+		<url-pattern>/index</url-pattern>
+	</filter-mapping>
+	<filter>
+		<filter-name>MyFilter</filter-name>
+		<filter-class>com.lanjian.filter.impl.MyFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>MyFilter</filter-name>
+		<url-pattern>/index</url-pattern>
+	</filter-mapping>
+
+
 	<servlet>
 		<servlet-name>IndexServlet</servlet-name>
 		<servlet-class>com.lanjian.servlet.impl.IndexServlet</servlet-class>
