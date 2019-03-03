@@ -190,8 +190,11 @@ public class ServletContext {
 	 * @explain 创建session
 	 */
 	public HttpSession createSession(ServletResponse response) {
+		// 新建一个Session，id随机
 		HttpSession session = new HttpSession(UUIDUtil.uuid());
+		// 让ServletContext管理该session
 		sessions.put(session.getId(), session);
+		// 向浏览器设置cookie，值为sessionId
 		response.addCookie(new Cookie("JSESSIONID", session.getId()));
 		return session;
 	}

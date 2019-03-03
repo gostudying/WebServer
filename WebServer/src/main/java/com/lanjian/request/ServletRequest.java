@@ -12,9 +12,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.lanjian.context.ServletContext;
+import com.lanjian.context.WebApplication;
+import com.lanjian.cookie.Cookie;
+import com.lanjian.request.dispatcher.RequestDispatcher;
+import com.lanjian.request.handler.RequestHandler;
+import com.lanjian.session.HttpSession;
 import com.lanjian.utils.LogUtil;
 
 /**
@@ -28,30 +35,33 @@ public class ServletRequest {
 	// 请求消息
 	private String requestInfo;
 	// 请求消息长度
-	private int len;
+	private int contentLength;
 	// 请求方法
 	private String method;
 	// 请求地址
-	private String url;
+	private String requestURI;
 	// 请求参数
 	private String parameters;
 	private Map<String, List<String>> parameterMap;
-
+	private List<Cookie> cookies;
 	// request域
 	private Map<String, Object> attributes;
-	private Map<String, String> cookieMap;
+	private HttpSession session;
+	private ServletContext context;
+	private RequestHandler requestHandler;
 
 	public ServletRequest() {
-		attributes = new HashMap<String, Object>();
+		attributes = new ConcurrentHashMap<String, Object>();
 		parameterMap = new HashMap<String, List<String>>();
-		cookieMap = new HashMap<String, String>();
+		cookies = new ArrayList<Cookie>();
+		context = WebApplication.getServletContext();
 	}
 
 	public ServletRequest(Socket client) throws IOException {
 		this();
 		// 接收客户端请求
 		in = client.getInputStream();
-
+		// 一次性将request请求读取进来
 		byte[] data = new byte[20480];
 		int len = in.read(data);
 		requestInfo = new String(data, 0, len).trim();
@@ -60,28 +70,56 @@ public class ServletRequest {
 		parseRequestInfo();
 	}
 
+	public HttpSession getSession() {
+		if (session != null) {
+			// 如果当前请求已经存在对应的Session，则直接返回
+			return session;
+		}
+		// 如果当前请求不存在对应的Session，则找到请求携带的cookie中JSESSIONID
+		// 用JSESSIONID在ServletContext中管理的所有session中找，如果找到则返回
+		// 如果还找不到，则为该用户创建一个session，并将sessionId写到浏览器cookie中
+		for (Cookie cookie : cookies) {
+			if (cookie.getKey().equals("JSESSIONID")) {
+				HttpSession curSession = context.getSession(cookie.getValue());
+				if (curSession != null) {
+					session = curSession;
+					return session;
+				}
+			}
+		}
+		session = context.createSession(requestHandler.getResponse());
+		return session;
+	}
+
+	public RequestDispatcher getRequestDispatcher() {
+		return new RequestDispatcher();
+	}
+
+	public ServletContext getServletContext() {
+		return this.context;
+	}
+
 	/**
 	 * @explain 解析请求
 	 */
 	private void parseRequestInfo() {
 		LogUtil.info("正在解析请求......");
-
 		// 第一行数据
 		// GET /index?name=name1&name=name2 HTTP/1.1
 		String firstLine = requestInfo.substring(0, requestInfo.indexOf(CRLF));
-		method = firstLine.substring(0, firstLine.indexOf(BLANK));
+		this.method = firstLine.substring(0, firstLine.indexOf(BLANK));
 		String urlStr = firstLine.substring(firstLine.indexOf(BLANK) + 1, firstLine.lastIndexOf(BLANK));
 		if (urlStr.contains("?")) {
 			// url中有参数
 			// ?需要转义
 			String[] urlArr = urlStr.split("\\?");
-			url = urlArr[0];
+			requestURI = urlArr[0];
 			if (urlArr.length > 1) {
 				parameters = urlArr[1];
 			}
 		} else {
 			// url中没有参数
-			url = urlStr;
+			requestURI = urlStr;
 			parameters = "";
 		}
 		if (method.equalsIgnoreCase("POST")) {
@@ -101,26 +139,16 @@ public class ServletRequest {
 		} else {
 			LogUtil.error("不支持的请求方法");
 		}
-//		System.out.println(method);
-//		System.out.println(url);
-//		System.out.println(parameters);
 		// 将parameters转换成map格式
 		convertMap();
-
 		// 解析cookie
 		parseCookies();
 		LogUtil.info("请求解析完成");
 	}
 
-//	GET / HTTP/1.1
-//	Host: localhost:8080
-//	Connection: keep-alive
-//	Upgrade-Insecure-Requests: 1
-//	User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3610.2 Safari/537.36
-//	Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8
-//	Accept-Encoding: gzip, deflate, br
-//	Accept-Language: zh-CN,zh;q=0.9
-//	Cookie: _za=882fe640-db90-4aee-9928-0699aa5ff475; _zap=34c2f4bb-698e-46d7-b036-00fab7e1d9c0; JSESSIONID=CA7F829A6ED0ABA6BC3906BEF2992A54
+	// Cookie: _za=882fe640-db90-4aee-9928-0699aa5ff475;
+	// _zap=34c2f4bb-698e-46d7-b036-00fab7e1d9c0;
+	// JSESSIONID=CA7F829A6ED0ABA6BC3906BEF2992A54
 	private void parseCookies() {
 		if (requestInfo.contains("Cookie")) {
 			String cookieTemp = requestInfo.substring(requestInfo.indexOf("Cookie")).trim();
@@ -141,7 +169,7 @@ public class ServletRequest {
 				if (cookieKV.length > 1) {
 					value = cookieKV[1];
 				}
-				cookieMap.put(key, value);
+				cookies.add(new Cookie(key, value));
 			}
 		}
 	}
@@ -175,24 +203,21 @@ public class ServletRequest {
 	 * @explain 根据key获取参数值
 	 */
 	public String[] getParameterValues(String key) {
-		List<String> parameterList;
-		if (parameterMap.containsKey(key)) {
-			parameterList = parameterMap.get(key);
-		} else {
+		List<String> parameterList = parameterMap.get(key);
+		if (parameterList == null) {
 			return new String[] {};
+		} else {
+			return parameterList.toArray(new String[0]);
 		}
-		return parameterList.toArray(new String[0]);
 	}
 
 	/**
 	 * @explain 根据key获取一个参数值
 	 */
-	public String getParameterValue(String key) {
-		List<String> parameterList;
-		if (parameterMap.containsKey(key)) {
-			parameterList = parameterMap.get(key);
-		} else {
-			return "";
+	public String getParameter(String key) {
+		List<String> parameterList = parameterMap.get(key);
+		if (parameterList == null) {
+			return null;
 		}
 		return parameterList.get(0);
 	}
@@ -214,16 +239,16 @@ public class ServletRequest {
 		return requestInfo;
 	}
 
-	public int getLen() {
-		return len;
+	public int getContentLength() {
+		return contentLength;
 	}
 
 	public String getMethod() {
 		return method;
 	}
 
-	public String getUrl() {
-		return url;
+	public String getRequestURI() {
+		return requestURI;
 	}
 
 	public Object getAttributes(String key) {
@@ -234,8 +259,14 @@ public class ServletRequest {
 		this.attributes.put(key, value);
 	}
 
-	public String getCookies(String key) {
-		return cookieMap.get(key);
+	public void removeAttributes(String key) {
+		if (this.attributes.containsKey(key)) {
+			this.attributes.remove(key);
+		}
+	}
+
+	public Cookie[] getCookies(String key) {
+		return cookies.toArray(new Cookie[1]);
 	}
 
 }

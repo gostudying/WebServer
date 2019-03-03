@@ -12,8 +12,11 @@ import com.lanjian.context.WebApplication;
  * @date 2019年3月2日
  */
 public class HttpSession {
+	// 用于标识不同的用户
 	private String id;
+	// session域
 	private Map<String, Object> attributes;
+	// session是否有效，默认有效，过期就将该值设为false
 	private boolean isValid;
 	// 用于判断sessiion是否过期，标准为当前时间-上次访问时间 >= 阈值
 	private Instant lastAccessed;
@@ -31,6 +34,7 @@ public class HttpSession {
 	public void invalidate() {
 		this.isValid = false;
 		this.attributes.clear();
+		// 在ServletContext管理的session中去掉该session
 		WebApplication.getServletContext().invalidateSession(this);
 	}
 

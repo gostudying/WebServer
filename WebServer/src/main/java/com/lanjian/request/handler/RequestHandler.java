@@ -3,7 +3,7 @@ package com.lanjian.request.handler;
 import java.io.IOException;
 import java.util.List;
 
-import com.lanjian.context.ServletContext;
+import com.lanjian.context.WebApplication;
 import com.lanjian.exception.ServerErrorException;
 import com.lanjian.exception.ServletNotFoundException;
 import com.lanjian.exception.base.ServletException;
@@ -25,16 +25,17 @@ public class RequestHandler implements Runnable, FilterChain {
 	private HttpServlet servlet;
 	private ExceptionHandler exceptionHandler;
 	private List<Filter> filters;
-	private ServletContext servletContext;
 	private int filterIndex = 0;
 
-	public RequestHandler(ServletRequest request, ServletResponse response, ServletContext servletContext)
-			throws ServletNotFoundException {
+	public RequestHandler(ServletRequest request, ServletResponse response) throws ServletNotFoundException {
 		this.request = request;
 		this.response = response;
-		this.servletContext = servletContext;
-		this.servlet = servletContext.getServlet(request.getUrl());
-		this.filters = servletContext.getFilters(request.getUrl());
+		this.servlet = WebApplication.getServletContext().getServlet(request.getRequestURI());
+		this.filters = WebApplication.getServletContext().getFilters(request.getRequestURI());
+	}
+
+	public ServletResponse getResponse() {
+		return this.response;
 	}
 
 	@Override
