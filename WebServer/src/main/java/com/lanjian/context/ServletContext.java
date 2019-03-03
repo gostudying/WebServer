@@ -11,6 +11,7 @@ import org.dom4j.Element;
 
 import com.lanjian.context.holder.FilterHolder;
 import com.lanjian.context.holder.ServletHolder;
+import com.lanjian.cookie.Cookie;
 import com.lanjian.exception.ServletNotFoundException;
 import com.lanjian.exception.base.ServletException;
 import com.lanjian.filter.Filter;
@@ -191,7 +192,7 @@ public class ServletContext {
 	public HttpSession createSession(ServletResponse response) {
 		HttpSession session = new HttpSession(UUIDUtil.uuid());
 		sessions.put(session.getId(), session);
-		response.addCookie("JSESSIONID", session.getId());
+		response.addCookie(new Cookie("JSESSIONID", session.getId()));
 		return session;
 	}
 

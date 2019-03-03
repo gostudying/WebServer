@@ -3,10 +3,10 @@ package com.lanjian.exception;
 import com.lanjian.constant.HttpStatus;
 import com.lanjian.exception.base.ServletException;
 
-public class ServletNotFoundException extends ServletException {
-	private static int status = HttpStatus.NotFound;
+public class ServerErrorException extends ServletException {
+	private static int status = HttpStatus.ServerError;
 
-	public ServletNotFoundException() {
+	public ServerErrorException() {
 		super(status);
 	}
 

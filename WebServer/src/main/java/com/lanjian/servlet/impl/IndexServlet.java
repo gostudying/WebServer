@@ -3,7 +3,8 @@ package com.lanjian.servlet.impl;
 import java.io.IOException;
 
 import com.lanjian.constant.HttpStatus;
-import com.lanjian.exception.InternalServerErrorException;
+import com.lanjian.cookie.Cookie;
+import com.lanjian.exception.ServerErrorException;
 import com.lanjian.exception.base.ServletException;
 import com.lanjian.request.ServletRequest;
 import com.lanjian.response.ServletResponse;
@@ -37,10 +38,11 @@ public class IndexServlet extends HttpServlet {
 			response.print("你好index");
 			response.print("</body>");
 			response.print("</html>");
-			response.addCookie("name", "lanjian");
+			response.sendRedirect("http://www.baidu.com");
+			response.addCookie(new Cookie("name", "lanjian"));
 			response.flush(HttpStatus.OK);
 		} catch (Exception e) {
-			throw new InternalServerErrorException();
+			throw new ServerErrorException();
 		}
 	}
 

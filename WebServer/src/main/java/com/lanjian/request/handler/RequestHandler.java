@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import com.lanjian.context.ServletContext;
-import com.lanjian.exception.InternalServerErrorException;
+import com.lanjian.exception.ServerErrorException;
 import com.lanjian.exception.ServletNotFoundException;
 import com.lanjian.exception.base.ServletException;
 import com.lanjian.exception.handler.ExceptionHandler;
@@ -65,7 +65,7 @@ public class RequestHandler implements Runnable, FilterChain {
 		try {
 			servlet.service(request, response);
 		} catch (IOException e) {
-			exceptionHandler.handle(new InternalServerErrorException(), response);
+			exceptionHandler.handle(new ServerErrorException(), response);
 		} catch (ServletException e) {
 			exceptionHandler.handle(e, response);
 		}
