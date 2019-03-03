@@ -3,18 +3,17 @@ package com.lanjian.server;
 import java.io.IOException;
 import java.net.Socket;
 
-import com.lanjian.request.dispatcher.RequestDispatcher;
 import com.lanjian.utils.CloseUtil;
 import com.lanjian.utils.LogUtil;
 
 public class Acceptor implements Runnable {
 	private Server server;
 	private Socket client;
-	private RequestDispatcher dispatcher;
+	private Dispatcher dispatcher;
 
 	public Acceptor(Server server) {
 		this.server = server;
-		this.dispatcher = new RequestDispatcher();
+		this.dispatcher = new Dispatcher();
 	}
 
 	@Override

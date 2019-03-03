@@ -19,8 +19,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.lanjian.context.ServletContext;
 import com.lanjian.context.WebApplication;
 import com.lanjian.cookie.Cookie;
-import com.lanjian.request.dispatcher.RequestDispatcher;
 import com.lanjian.request.handler.RequestHandler;
+import com.lanjian.server.Dispatcher;
 import com.lanjian.session.HttpSession;
 import com.lanjian.utils.LogUtil;
 
@@ -91,8 +91,8 @@ public class ServletRequest {
 		return session;
 	}
 
-	public RequestDispatcher getRequestDispatcher() {
-		return new RequestDispatcher();
+	public Dispatcher getRequestDispatcher() {
+		return new Dispatcher();
 	}
 
 	public ServletContext getServletContext() {

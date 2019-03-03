@@ -1,38 +1,18 @@
 package com.lanjian.request.dispatcher;
 
 import java.io.IOException;
-import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import com.lanjian.exception.ServletNotFoundException;
-import com.lanjian.exception.handler.ExceptionHandler;
+import com.lanjian.exception.base.ServletException;
 import com.lanjian.request.ServletRequest;
-import com.lanjian.request.handler.RequestHandler;
 import com.lanjian.response.ServletResponse;
 
 /**
- * @explain 多任务分发器
+ * @explain 请求转发
  * @author lanjian
- * @date 2019年3月2日
+ * @date 2019年3月3日
  */
 public class RequestDispatcher {
-	private ExecutorService pool;
-	private ExceptionHandler exceptionHandler;
-
-	public RequestDispatcher() {
-		pool = Executors.newFixedThreadPool(10);
-		exceptionHandler = new ExceptionHandler();
-	}
-
-	public void doDispatch(Socket client) throws IOException {
-		ServletRequest request = new ServletRequest(client);
-		ServletResponse response = new ServletResponse(client);
-		try {
-			RequestHandler requestHandler = new RequestHandler(request, response);
-			pool.execute(requestHandler);
-		} catch (ServletNotFoundException e) {
-			exceptionHandler.handle(e, response);
-		} 
+	void forward(ServletRequest request, ServletResponse response) throws ServletException, IOException {
+		
 	}
 }
