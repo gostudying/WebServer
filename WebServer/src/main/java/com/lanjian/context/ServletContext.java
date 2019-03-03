@@ -10,8 +10,8 @@ import org.dom4j.Element;
 import com.lanjian.context.holder.ServletHolder;
 import com.lanjian.exception.ServletNotFoundException;
 import com.lanjian.exception.base.ServletException;
-import com.lanjian.response.Response;
-import com.lanjian.servlet.HttpServlet;
+import com.lanjian.response.ServletResponse;
+import com.lanjian.servlet.http.HttpServlet;
 import com.lanjian.session.Session;
 import com.lanjian.utils.LogUtil;
 import com.lanjian.utils.UUIDUtil;
@@ -24,6 +24,7 @@ import com.lanjian.utils.XMLUtil;
  */
 @SuppressWarnings("unchecked")
 public class ServletContext {
+
 	// index --> IndexServlet 一对一
 	private Map<String, ServletHolder> servlet;
 	// /index --> index 多对一
@@ -107,7 +108,7 @@ public class ServletContext {
 	/**
 	 * @explain 创建session
 	 */
-	public Session createSession(Response response) {
+	public Session createSession(ServletResponse response) {
 		Session session = new Session(UUIDUtil.uuid());
 		sessions.put(session.getId(), session);
 		response.addCookie("JSESSIONID", session.getId());

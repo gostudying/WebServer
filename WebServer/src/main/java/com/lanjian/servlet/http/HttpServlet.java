@@ -1,11 +1,12 @@
-package com.lanjian.servlet;
+package com.lanjian.servlet.http;
 
 import java.io.IOException;
 
 import com.lanjian.constant.RequestMethod;
 import com.lanjian.exception.base.ServletException;
-import com.lanjian.request.Request;
-import com.lanjian.response.Response;
+import com.lanjian.request.ServletRequest;
+import com.lanjian.response.ServletResponse;
+import com.lanjian.servlet.Servlet;
 
 /**
  * @explain 用于处理HTTP请求
@@ -25,7 +26,7 @@ public abstract class HttpServlet implements Servlet {
 	}
 
 	@Override
-	public void service(Request request, Response response) throws IOException, ServletException {
+	public void service(ServletRequest request, ServletResponse response) throws IOException, ServletException {
 		if (request.getMethod().equalsIgnoreCase(RequestMethod.GET)) {
 			doGet(request, response);
 		} else if (request.getMethod().equalsIgnoreCase(RequestMethod.POST)) {
@@ -33,11 +34,11 @@ public abstract class HttpServlet implements Servlet {
 		}
 	}
 
-	public void doGet(Request request, Response response) throws IOException, ServletException {
+	public void doGet(ServletRequest request, ServletResponse response) throws IOException, ServletException {
 
 	}
 
-	public void doPost(Request request, Response response) throws IOException, ServletException {
+	public void doPost(ServletRequest request, ServletResponse response) throws IOException, ServletException {
 
 	}
 

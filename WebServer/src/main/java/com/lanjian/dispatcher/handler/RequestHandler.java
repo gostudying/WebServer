@@ -5,9 +5,9 @@ import java.io.IOException;
 import com.lanjian.exception.InternalServerErrorException;
 import com.lanjian.exception.base.ServletException;
 import com.lanjian.exception.handler.ExceptionHandler;
-import com.lanjian.request.Request;
-import com.lanjian.response.Response;
-import com.lanjian.servlet.HttpServlet;
+import com.lanjian.request.ServletRequest;
+import com.lanjian.response.ServletResponse;
+import com.lanjian.servlet.http.HttpServlet;
 
 /**
  * @explain servlet容器，用于处理单个request请求
@@ -15,12 +15,12 @@ import com.lanjian.servlet.HttpServlet;
  * @date 2019年3月2日
  */
 public class RequestHandler implements Runnable {
-	private Response response;
-	private Request request;
+	private ServletResponse response;
+	private ServletRequest request;
 	private HttpServlet servlet;
 	private ExceptionHandler exceptionHandler;
 
-	public RequestHandler(Request request, Response response, HttpServlet servlet) {
+	public RequestHandler(ServletRequest request, ServletResponse response, HttpServlet servlet) {
 		this.request = request;
 		this.response = response;
 		this.servlet = servlet;

@@ -24,7 +24,7 @@ import com.lanjian.utils.LogUtil;
  * @author lanjian
  * @date 2019年2月28日
  */
-public class Response {
+public class ServletResponse {
 	// 输出缓冲流
 	private BufferedWriter out;
 	// 正文
@@ -36,7 +36,7 @@ public class Response {
 	private Map<String, String> cookies;
 	private StringBuilder cookieStr;
 
-	private Response() {
+	private ServletResponse() {
 		content = new StringBuilder();
 		len = 0;
 		headInfo = new StringBuilder();
@@ -44,7 +44,7 @@ public class Response {
 		cookieStr = new StringBuilder();
 	}
 
-	public Response(Socket client) throws IOException {
+	public ServletResponse(Socket client) throws IOException {
 		this();
 		out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
 	}
@@ -83,13 +83,13 @@ public class Response {
 		headInfo.append(CRLF);
 	}
 
-	public Response print(String info) {
+	public ServletResponse print(String info) {
 		content.append(info);
 		len += info.getBytes().length;
 		return this;
 	}
 
-	public Response println(String info) {
+	public ServletResponse println(String info) {
 		content.append(info).append(CRLF);
 		len += info.getBytes().length + CRLF.length();
 		return this;

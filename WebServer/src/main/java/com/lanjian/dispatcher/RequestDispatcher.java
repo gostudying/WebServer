@@ -10,9 +10,9 @@ import com.lanjian.context.WebApplication;
 import com.lanjian.dispatcher.handler.RequestHandler;
 import com.lanjian.exception.ServletNotFoundException;
 import com.lanjian.exception.handler.ExceptionHandler;
-import com.lanjian.request.Request;
-import com.lanjian.response.Response;
-import com.lanjian.servlet.HttpServlet;
+import com.lanjian.request.ServletRequest;
+import com.lanjian.response.ServletResponse;
+import com.lanjian.servlet.http.HttpServlet;
 
 /**
  * @explain 多任务分发器
@@ -31,8 +31,8 @@ public class RequestDispatcher {
 	}
 
 	public void doDispatch(Socket client) throws IOException {
-		Request request = new Request(client);
-		Response response = new Response(client);
+		ServletRequest request = new ServletRequest(client);
+		ServletResponse response = new ServletResponse(client);
 		try {
 			HttpServlet servlet = servletContext.getServlet(request.getUrl());
 			RequestHandler requestHandler = new RequestHandler(request, response, servlet);

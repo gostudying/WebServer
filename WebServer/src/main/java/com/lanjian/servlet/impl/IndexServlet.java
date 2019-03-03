@@ -5,9 +5,9 @@ import java.io.IOException;
 import com.lanjian.constant.HttpStatus;
 import com.lanjian.exception.InternalServerErrorException;
 import com.lanjian.exception.base.ServletException;
-import com.lanjian.request.Request;
-import com.lanjian.response.Response;
-import com.lanjian.servlet.HttpServlet;
+import com.lanjian.request.ServletRequest;
+import com.lanjian.response.ServletResponse;
+import com.lanjian.servlet.http.HttpServlet;
 import com.lanjian.utils.LogUtil;
 
 public class IndexServlet extends HttpServlet {
@@ -23,7 +23,7 @@ public class IndexServlet extends HttpServlet {
 	}
 
 	@Override
-	public void doGet(Request request, Response response) throws IOException, ServletException {
+	public void doGet(ServletRequest request, ServletResponse response) throws IOException, ServletException {
 		try {
 			LogUtil.info("正在向浏览器返回数据......");
 			// 响应内容
@@ -45,7 +45,7 @@ public class IndexServlet extends HttpServlet {
 	}
 
 	@Override
-	public void doPost(Request request, Response response) throws IOException, ServletException {
+	public void doPost(ServletRequest request, ServletResponse response) throws IOException, ServletException {
 		
 	}
 

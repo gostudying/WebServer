@@ -1,6 +1,6 @@
 package com.lanjian.context.holder;
 
-import com.lanjian.servlet.HttpServlet;
+import com.lanjian.servlet.http.HttpServlet;
 
 /**
  * @explain 将类名和类实例捆绑在一起

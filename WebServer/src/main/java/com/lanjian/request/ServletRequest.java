@@ -22,7 +22,7 @@ import com.lanjian.utils.LogUtil;
  * @author lanjian
  * @date 2019年2月28日
  */
-public class Request {
+public class ServletRequest {
 	// 输入流
 	private InputStream in;
 	// 请求消息
@@ -41,13 +41,13 @@ public class Request {
 	private Map<String, Object> attributes;
 	private Map<String, String> cookieMap;
 
-	public Request() {
+	public ServletRequest() {
 		attributes = new HashMap<String, Object>();
 		parameterMap = new HashMap<String, List<String>>();
 		cookieMap = new HashMap<String, String>();
 	}
 
-	public Request(Socket client) throws IOException {
+	public ServletRequest(Socket client) throws IOException {
 		this();
 		// 接收客户端请求
 		in = client.getInputStream();
